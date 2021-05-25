@@ -1,27 +1,21 @@
 import requests
 import csv
 
-key = input('masukkan keyword : ')
-write = csv.writer(open('hasil/{}.csv'.format(key), 'w', newline=''))
+keyword = input('masukkan keyword : ')
+pages = input('masukkan jumlah halaman (50 item/halaman) : ')
+pages = int(pages)
+
+write = csv.writer(open('hasil/{}.csv'.format(keyword), 'w', newline=''))
 header = ['Brand', 'Nama', 'Harga', 'Diskon', 'Harga Sebelum Diskon']
 write.writerow(header)
 
-
-url2 = 'https://api.bukalapak.com/multistrategy-products'
-url1 = 'https://api.bukalapak.com/category-suggestions/categories'
 url = 'https://shopee.co.id/api/v4/search/search_items'
 
-parameter1 ={
-  'term' : 'sepatu',
-  'limit' : 3,
-  'access_token' : 'pyot8mg1tmsmhmO36sr-rWhjMMLhrfxNisBjAWOUverbvQ'
-}
-
 count = 0
-for page in range(0,2):
+for page in range(0,pages):
   parameter = {
     'by' : 'relevancy',
-    'keyword' : key,
+    'keyword' : keyword,
     'limit' : 50,
     'newest' : page,
     'order' : 'desc',
@@ -32,9 +26,9 @@ for page in range(0,2):
 
   r = requests.get(url, params=parameter).json()
 
-  products = r['items']
+  items = r['items']
 
-  for p in products:
+  for p in items:
     brand = p['item_basic']['brand']
     name = p['item_basic']['name']
     price = p['item_basic']['price']
@@ -43,6 +37,6 @@ for page in range(0,2):
     count+=1
     print('No. ', count, 'brand : ',brand, 'name : ',name, 'price : ', price)
 
-    write = csv.writer(open('hasil/{}.csv'.format(key), 'a', newline=''))
-    data = [brand, name, price, discount, price_before_discount]
+    write = csv.writer(open('hasil/{}.csv'.format(keyword), 'a', newline=''))
+    data = [brand if brand else "Tidak Ada Merek", name if name else "N/A", price, discount if discount else "N/A", price_before_discount if price_before_discount else "N/A"]
     write.writerow(data)
